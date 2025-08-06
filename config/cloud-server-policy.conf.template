@@ -1,0 +1,35 @@
+config server-policy vserver
+  edit "fwbqa"
+    config  vip-list
+      edit 1
+        set interface port1
+        set use-interface-ip enable
+      next
+    end
+  next
+end
+config server-policy server-pool
+  edit "fwbqa"
+    config  pserver-list
+      edit 1
+        set ip {{server_pool_ip}}
+      next
+    end
+  next
+end
+config server-policy policy
+  edit "fwbqa"
+    set ssl enable
+    set vserver fwbqa
+    set service HTTP
+    set replacemsg Predefined
+    set server-pool fwbqa
+    set https-service HTTPS
+    set web-protection-profile "Inline Standard Protection"
+    set tlog enable
+  next
+end
+config log traffic-log
+  set status enable
+  set packet-log enable
+end
