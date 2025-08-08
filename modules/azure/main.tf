@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "4.37.0"
+    }
+  }
+}
+
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
@@ -139,30 +148,45 @@ resource "azurerm_public_ip" "fortiweb_byol" {
   allocation_method   = "Static"
 }
 
-resource "azurerm_managed_disk" "fortiweb_payg_data" {
-  name                 = "fwb-payg-${var.fwb_version}-${var.fwb_build}-data"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
-  storage_account_type = "Premium_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = 32
-}
 
-resource "azurerm_linux_virtual_machine" "fortiweb_payg" {
-  name                            = "fwb-payg-${var.fwb_version}-${var.fwb_build}"
-  location                        = var.location
-  resource_group_name             = var.resource_group_name
-  network_interface_ids           = [azurerm_network_interface.fortiweb_payg_nic.id]
-  size                            = var.instance_type
-  admin_username                  = var.admin_username
-  disable_password_authentication = false
-  admin_password                  = var.admin_password
 
-  source_image_id = data.azurerm_image.fortiweb_payg_image.id
+resource "azurerm_virtual_machine" "fortiweb_payg" {
+  name                             = "fwb-payg-${var.fwb_version}-${var.fwb_build}"
+  location                         = var.location
+  resource_group_name              = var.resource_group_name
+  network_interface_ids            = [azurerm_network_interface.fortiweb_payg_nic.id]
+  vm_size                          = var.instance_type
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
 
-  os_disk {
-    storage_account_type = "Premium_LRS"
-    caching              = "None"
+  storage_image_reference {
+    id = data.azurerm_image.fortiweb_payg_image.id
+  }
+
+  storage_os_disk {
+    name              = "fwb-payg-os-disk"
+    caching           = "None"
+    create_option     = "FromImage"
+    managed_disk_type = "Premium_LRS"
+  }
+
+  storage_data_disk {
+    name              = "fwb-payg-data-disk"
+    managed_disk_type = "Premium_LRS"
+    create_option     = "Empty"
+    caching           = "ReadOnly"
+    disk_size_gb      = 32
+    lun               = 0
+  }
+
+  os_profile {
+    computer_name  = "fwb-payg"
+    admin_username = var.admin_username
+    admin_password = var.admin_password
+  }
+
+  os_profile_linux_config {
+    disable_password_authentication = false
   }
 
   tags = {
@@ -171,37 +195,45 @@ resource "azurerm_linux_virtual_machine" "fortiweb_payg" {
   }
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "fortiweb_payg_data" {
-  managed_disk_id    = azurerm_managed_disk.fortiweb_payg_data.id
-  virtual_machine_id = azurerm_linux_virtual_machine.fortiweb_payg.id
-  lun                = 0
-  caching            = "ReadOnly"
-}
 
-resource "azurerm_managed_disk" "fortiweb_byol_data" {
-  name                 = "fwb-byol-${var.fwb_version}-${var.fwb_build}-data"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
-  storage_account_type = "Premium_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = 32
-}
 
-resource "azurerm_linux_virtual_machine" "fortiweb_byol" {
-  name                            = "fwb-byol-${var.fwb_version}-${var.fwb_build}"
-  location                        = var.location
-  resource_group_name             = var.resource_group_name
-  network_interface_ids           = [azurerm_network_interface.fortiweb_byol_nic.id]
-  size                            = var.instance_type
-  admin_username                  = var.admin_username
-  disable_password_authentication = false
-  admin_password                  = var.admin_password
+resource "azurerm_virtual_machine" "fortiweb_byol" {
+  name                             = "fwb-byol-${var.fwb_version}-${var.fwb_build}"
+  location                         = var.location
+  resource_group_name              = var.resource_group_name
+  network_interface_ids            = [azurerm_network_interface.fortiweb_byol_nic.id]
+  vm_size                          = var.instance_type
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
 
-  source_image_id = data.azurerm_image.fortiweb_byol_image.id
+  storage_image_reference {
+    id = data.azurerm_image.fortiweb_byol_image.id
+  }
 
-  os_disk {
-    storage_account_type = "Premium_LRS"
-    caching              = "None"
+  storage_os_disk {
+    name              = "fwb-byol-os-disk"
+    caching           = "None"
+    create_option     = "FromImage"
+    managed_disk_type = "Premium_LRS"
+  }
+
+  storage_data_disk {
+    name              = "fwb-byol-data-disk"
+    managed_disk_type = "Premium_LRS"
+    create_option     = "Empty"
+    caching           = "ReadOnly"
+    disk_size_gb      = 32
+    lun               = 0
+  }
+
+  os_profile {
+    computer_name  = "fwb-byol"
+    admin_username = var.admin_username
+    admin_password = var.admin_password
+  }
+
+  os_profile_linux_config {
+    disable_password_authentication = false
   }
 
   tags = {
@@ -210,12 +242,6 @@ resource "azurerm_linux_virtual_machine" "fortiweb_byol" {
   }
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "fortiweb_byol_data" {
-  managed_disk_id    = azurerm_managed_disk.fortiweb_byol_data.id
-  virtual_machine_id = azurerm_linux_virtual_machine.fortiweb_byol.id
-  lun                = 0
-  caching            = "ReadOnly"
-}
 
 resource "azurerm_network_interface_security_group_association" "fortiweb_payg_nsg_association" {
   network_interface_id      = azurerm_network_interface.fortiweb_payg_nic.id

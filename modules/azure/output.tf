@@ -1,6 +1,6 @@
 output "byol_instance_hostname" {
   description = "Private DNS name of the VM instance."
-  value       = azurerm_linux_virtual_machine.fortiweb_byol.id
+  value       = azurerm_virtual_machine.fortiweb_byol.id
 }
 
 output "fwb_byol_public_ip" {
@@ -10,7 +10,7 @@ output "fwb_byol_public_ip" {
 
 output "payg_instance_hostname" {
   description = "Private DNS name of the VM instance."
-  value       = azurerm_linux_virtual_machine.fortiweb_payg.id
+  value       = azurerm_virtual_machine.fortiweb_payg.id
 }
 
 output "fwb_payg_public_ip" {

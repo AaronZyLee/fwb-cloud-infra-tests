@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.92"
+      version = "5.92.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -10,7 +10,7 @@ terraform {
     }
     oci = {
       source  = "oracle/oci"
-      version = "~> 7.11.0"
+      version = "7.11.0"
     }
   }
 

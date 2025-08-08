@@ -24,15 +24,15 @@ module "fortiweb_azure" {
   # pass other common inputs
 }
 
-module "fortiweb_oci" {
-  source = "./modules/oci"
-  region              = var.oci_region
-  fwb_version         = var.fwb_version
-  fwb_build           = var.fwb_build
-  my_ip               = var.my_ip
-  instance_type       = var.oci_instance_type
-  compartment_id      = var.oci_compartment_id
-  availability_domain = var.oci_availability_domain
-  subnet_id           = var.oci_subnet_id
-  # pass other common inputs
-}
+# module "fortiweb_oci" {
+#   source = "./modules/oci"
+#   region              = var.oci_region
+#   fwb_version         = var.fwb_version
+#   fwb_build           = var.fwb_build
+#   my_ip               = var.my_ip
+#   instance_type       = var.oci_instance_type
+#   compartment_id      = var.oci_compartment_id
+#   availability_domain = var.oci_availability_domain
+#   subnet_id           = var.oci_subnet_id
+#   # pass other common inputs
+# }
