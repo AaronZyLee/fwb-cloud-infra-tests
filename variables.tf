@@ -67,10 +67,23 @@ variable "azure_admin_password" {
   type        = string
 }
 
+# OCI
 variable "oci_instance_type" {
   description = "The OCI compute instance's shape."
   type        = string
   default     = "VM.Standard2.1"
+}
+
+variable "oci_instance_ocpus" {
+  description = "Number of OCPUs for Flex instances"
+  type        = number
+  default     = 1
+}
+
+variable "oci_instance_memory_in_gbs" {
+  description = "Memory in GBs for Flex instances"
+  type        = number
+  default     = 16
 }
 
 variable "oci_compartment_id" {
@@ -88,7 +101,6 @@ variable "oci_subnet_id" {
   type        = string
 }
 
-# OCI
 variable "oci_region" {
   description = "OCI region"
   type        = string

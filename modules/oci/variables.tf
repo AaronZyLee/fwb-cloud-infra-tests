@@ -21,7 +21,16 @@ variable "my_ip" {
 variable "instance_type" {
   description = "The compute instance's shape"
   type        = string
-  default     = "VM.Standard2.1"
+}
+
+variable "instance_ocpus" {
+  description = "Number of OCPUs for Flex instances"
+  type        = number
+}
+
+variable "instance_memory_in_gbs" {
+  description = "Memory in GBs for Flex instances"
+  type        = number
 }
 
 variable "compartment_id" {

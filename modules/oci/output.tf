@@ -5,5 +5,5 @@ output "byol_instance_hostname" {
 
 output "fwb_byol_public_ip" {
   description = "Public IP address of fortiweb."
-  value       = oci_core_instance.fortiweb_byol.*.private_ip
+  value       = oci_core_instance.fortiweb_byol.public_ip
 }

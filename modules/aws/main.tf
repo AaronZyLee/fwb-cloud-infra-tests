@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = var.region
-}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -126,6 +122,7 @@ resource "aws_security_group" "fortiweb_sg" {
 
 
 resource "aws_instance" "fortiweb_payg" {
+  count                  = data.aws_ami.fortiweb_payg_ami.id != "" ? 1 : 0
   ami                    = data.aws_ami.fortiweb_payg_ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.fortiweb_sg.id]
@@ -147,6 +144,7 @@ resource "aws_instance" "fortiweb_payg" {
 }
 
 resource "aws_instance" "fortiweb_byol" {
+  count                  = data.aws_ami.fortiweb_byol_ami.id != "" ? 1 : 0
   ami                    = data.aws_ami.fortiweb_byol_ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.fortiweb_sg.id]

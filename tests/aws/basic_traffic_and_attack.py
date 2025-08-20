@@ -36,37 +36,38 @@ if __name__ == "__main__":
         byol_instance_id = get_instance_id("aws_byol_instance_hostname")
         payg_instance_id = get_instance_id("aws_payg_instance_hostname")
         
-        # Ensure BYOL instance is running
+        # Ensure BYOL instance is running (only if it exists)
         if byol_instance_id:
             if not ensure_instance_running("BYOL", byol_instance_id):
                 logger.error("Cannot proceed with BYOL instance")
                 exit(1)
         else:
-            logger.error("Cannot proceed without a valid BYOL instance ID")
-            exit(1)
+            logger.info("BYOL instance not provisioned, skipping BYOL tests")
         
-        # Ensure PAYG instance is running
+        # Ensure PAYG instance is running (only if it exists)
         if payg_instance_id:
             if not ensure_instance_running("PAYG", payg_instance_id):
                 logger.warning("Cannot proceed with PAYG instance, but continuing with BYOL")
         else:
-            logger.warning("PAYG instance ID not available, skipping PAYG instance check")
+            logger.info("PAYG instance not provisioned, skipping PAYG tests")
         
         # Get public IPs from Terraform output        
         byol_ip = get_public_ip("fwb_aws_byol_public_ip")
         payg_ip = get_public_ip("fwb_aws_payg_public_ip")
 
         # Configure BYOL instance if available
-        if byol_ip:
+        if byol_ip and byol_instance_id:
             logger.info(f"Connecting to FortiWeb BYOL at {byol_ip}")
             configure_fortiweb(byol_ip, USERNAME, PASSWORD, config_content)
             
             # Wait for configuration to be applied before testing
             logger.info("Waiting for BYOL configuration to be applied...")
             time.sleep(5)  # Wait for 5 seconds
-        else:
+        elif byol_instance_id:
             logger.error("Cannot proceed without a valid BYOL public IP")
             exit(1)
+        else:
+            logger.info("BYOL instance not provisioned, skipping BYOL configuration")
             
         # Configure PAYG instance if available
         if payg_ip and payg_instance_id:
@@ -76,19 +77,31 @@ if __name__ == "__main__":
             # Wait for configuration to be applied before testing
             logger.info("Waiting for PAYG configuration to be applied...")
             time.sleep(5)  # Wait for 5 seconds
+        elif payg_instance_id:
+            logger.error("Cannot proceed without a valid PAYG public IP")
+            exit(1)
         else:
-            logger.warning("PAYG public IP or instance ID not available, skipping PAYG configuration")
+            logger.info("PAYG instance not provisioned, skipping PAYG configuration")
             
         # Run tests on BYOL instance
-        if not run_tests_for_instance("BYOL", byol_ip):
+        if byol_ip and byol_instance_id:
+            if not run_tests_for_instance("BYOL", byol_ip):
+                exit(1)
+        elif byol_instance_id:
+            logger.error("Cannot run tests without a valid BYOL public IP")
             exit(1)
+        else:
+            logger.info("BYOL instance not provisioned, skipping BYOL tests")
             
         # Run tests on PAYG instance if available
         if payg_ip and payg_instance_id:
             if not run_tests_for_instance("PAYG", payg_ip):
                 exit(1)
+        elif payg_instance_id:
+            logger.error("Cannot run tests without a valid PAYG public IP")
+            exit(1)
         else:
-            logger.warning("PAYG public IP or instance ID not available, skipping PAYG tests")
+            logger.info("PAYG instance not provisioned, skipping PAYG tests")
             
     except Exception as e:
         logger.error(f"Configuration failed: {str(e)}")

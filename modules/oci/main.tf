@@ -2,13 +2,17 @@ terraform {
   required_providers {
     oci = {
       source  = "oracle/oci"
-      version = "7.11.0"
+      version = "~> 7.14.0"  # Updated to a more recent version
     }
   }
 }
 
-provider "oci" {
-  region = var.region
+data "oci_identity_availability_domains" "ads" {
+  compartment_id = var.compartment_id
+}
+
+locals {
+  ad_name = data.oci_identity_availability_domains.ads.availability_domains[0].name
 }
 
 data "oci_core_images" "fortiweb_byol_images" {
@@ -98,22 +102,19 @@ resource "oci_core_network_security_group_security_rule" "allow_vpc_internal" {
   description               = "Allow all traffic within VCN"
 }
 
-
-resource "oci_core_volume" "fortiweb_byol_data" {
-  availability_domain = var.availability_domain
-  compartment_id      = var.compartment_id
-  display_name        = "fwb-byol-${var.fwb_version}-${var.fwb_build}-data"
-  size_in_gbs         = 30
-}
-
 resource "oci_core_instance" "fortiweb_byol" {
-  availability_domain = var.availability_domain
+  availability_domain = local.ad_name
   compartment_id      = var.compartment_id
   display_name        = "fwb-byol-${var.fwb_version}-${var.fwb_build}"
   shape               = var.instance_type
 
+  shape_config {
+    ocpus         = var.instance_ocpus
+    memory_in_gbs = var.instance_memory_in_gbs
+  }
+
   create_vnic_details {
-    assign_public_ip = false
+    assign_public_ip = true
     subnet_id        = var.subnet_id
     nsg_ids          = [oci_core_network_security_group.fortiweb_nsg.id]
   }
@@ -123,16 +124,8 @@ resource "oci_core_instance" "fortiweb_byol" {
     source_id   = data.oci_core_images.fortiweb_byol_images.images[0]["id"]
   }
 
-  preserve_boot_volume = false
-
   freeform_tags = {
-    Name  = "fwb-byol-${var.fwb_version}-${var.fwb_build}"
-    Owner = "fwbqa"
+    "Name"  = "fwb-byol-${var.fwb_version}-${var.fwb_build}"
+    "Owner" = "fwbqa"
   }
-}
-
-resource "oci_core_volume_attachment" "fortiweb_byol_data" {
-  attachment_type = "iscsi"
-  instance_id     = oci_core_instance.fortiweb_byol.id
-  volume_id       = oci_core_volume.fortiweb_byol_data.id
 }

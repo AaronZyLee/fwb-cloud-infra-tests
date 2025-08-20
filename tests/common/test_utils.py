@@ -148,10 +148,13 @@ def configure_fortiweb(ip, username, password, config_content):
         # Execute config directly from memory
         stdin, stdout, stderr = client.exec_command(config_content)
 
-        # Log output
-        logger.info(stdout.read().decode())
-        if stderr.read():
-            logger.error(stderr.read().decode())
+        # Capture output but don't display it
+        stdout_data = stdout.read().decode()
+        stderr_data = stderr.read().decode()
+        
+        # Optional: Log only if there's an error
+        if stderr_data:
+            logger.error(f"SSH command error: {stderr_data}")
 
     except Exception as e:
         logger.error(f"SSH connection failed: {str(e)}")
