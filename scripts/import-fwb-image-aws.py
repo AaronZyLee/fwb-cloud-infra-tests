@@ -150,7 +150,7 @@ def parse_filename(filename):
     license_type = 'payg' if 'ONDEMAND' in filename.upper() else 'byol'
     
     # Extract version
-    version_match = re.search(r'-v(\d+)\.', filename)
+    version_match = re.search(r'-v(\d+)(?:\.|-)', filename)
     version = f'v{version_match.group(1)}' if version_match else 'v7'
     
     # Extract build number
