@@ -22,3 +22,8 @@ variable "instance_type" {
   description = "The EC2 instance's type"
   type        = string
 }
+
+variable "subnet_id" {
+  description = "Subnet for FortiWeb instance"
+  type        = string
+}

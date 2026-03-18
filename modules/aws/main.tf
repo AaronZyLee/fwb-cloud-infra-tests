@@ -126,6 +126,7 @@ resource "aws_instance" "fortiweb_payg" {
   ami                    = data.aws_ami.fortiweb_payg_ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.fortiweb_sg.id]
+  subnet_id = var.subnet_id
   root_block_device {
     volume_size           = 2
     volume_type           = "gp3"
@@ -148,6 +149,7 @@ resource "aws_instance" "fortiweb_byol" {
   ami                    = data.aws_ami.fortiweb_byol_ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.fortiweb_sg.id]
+  subnet_id = var.subnet_id
   root_block_device {
     volume_size           = 8
     volume_type           = "gp3"

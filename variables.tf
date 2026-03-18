@@ -25,6 +25,11 @@ variable "aws_instance_type" {
   default     = "t3.micro"
 }
 
+variable "aws_subnet_id" {
+  description = "Subnet for FortiWeb instance"
+  type        = string
+}
+
 #Azure
 variable "azure_instance_type" {
   description = "The Azure VM instance's type."

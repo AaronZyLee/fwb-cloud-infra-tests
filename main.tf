@@ -22,6 +22,7 @@ module "fortiweb_aws" {
   fwb_build     = var.fwb_build
   my_ip         = var.my_ip
   instance_type = var.aws_instance_type
+  subnet_id     = var.aws_subnet_id
   # pass other common inputs
 
   providers = {
